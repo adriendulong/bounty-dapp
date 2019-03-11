@@ -10,6 +10,8 @@ contract BountyApp {
     using Counter for Counter.Counter;
     
     address public owner;
+
+    bool public stopped = false;
     
     /**
      * @dev Bounty struct
@@ -47,6 +49,7 @@ contract BountyApp {
      * fullfill a bounty
      */
     struct Work {
+        string workFileHash;
         string description;
         // if the bounty creator refused it
         bool denied;
@@ -89,9 +92,28 @@ contract BountyApp {
         owner = msg.sender;
     }
     
+    /**
+     * @dev Modifier that avoid a function to run when we are 
+     * in an emergency situation (Circuit Breaker design pattern)
+     */
+    modifier stopInEmergency { require(!stopped); _; }
+
+    /**
+     * @dev Modifier that make sure this function can run only when 
+     * the smart contract is in emergency mode (Circuit Breaker design pattern)
+     */
+    modifier onlyInEmergency { require(stopped); _; }
+
+
+    /**
+     * @dev Modifier that checks if the function caller is also the smart contract owner
+     */
+    modifier onlyOwner { require(msg.sender == owner); _; }
+
 
     /**
      * @dev Modifier that check if a bounty exists
+     * @param id uint256 Bounty id
      */
     modifier bountyExist(uint256 id) {
         require(idToBounty[id].exist != false, "This bounty does not exist");
@@ -101,6 +123,7 @@ contract BountyApp {
 
     /**
      * @dev Modifier that check if a work exists
+     * @param id uint256 Work id
      */
     modifier workExist(uint256 id) {
         require(idToWork[id].exist != false, "This work does not exist");
@@ -110,16 +133,27 @@ contract BountyApp {
 
     /**
      * @dev Modifier that checks that an bounty is still open
+     * @param id uint256 Bounty id
      */
     modifier bountyOpen(uint256 id) {
         require(idToBounty[id].isOpened == true, "Bounty not opened for work");
         _;
+    }
+
+
+    /**
+     * @dev Activate the emergency mode (Circuit Breaker design patter)
+     * Only the owner of the smart contract can do it
+     */
+    function activateCircuitBreaker() onlyOwner public {
+        stopped = true;
     }
     
 
     /**
      * @dev Returns the number of work that has been submitted for this bounty
      * @param id uint256 Id of the job 
+     * @return uint256
      */
     function bountyCountWorks(uint256 id) public view bountyExist(id) returns (uint256) {
         return bountyIdToWorkIds[id].length;
@@ -129,6 +163,7 @@ contract BountyApp {
     /**
      * @dev Returns true if the bounty has not been filled yet
      * @param _bountyId uint256 Id of the bounty
+     * @return bool
      */
     function isBountyOpened(uint256 _bountyId) public view bountyExist(_bountyId) returns (bool) {
         return idToBounty[_bountyId].isOpened;
@@ -141,8 +176,9 @@ contract BountyApp {
      * @param amount uint256 Amount to be paid when the bounty is done
      * @param title string Title of the bounty to create
      * @param description string Description of the bounty 
+     * @return bountyId uint256
      */
-    function createBounty(uint256 amount, string memory title, string memory description) public payable returns (uint256) {
+    function createBounty(uint256 amount, string memory title, string memory description) stopInEmergency public payable returns (uint256) {
         // Check that the user pays at leat the amount he is willing to pay for the bounty
         require(msg.value >= amount, "Ether sent must be at least equal to the amount you're willing to pay for the bounty");
         // Create a new bounty
@@ -176,6 +212,12 @@ contract BountyApp {
     /**
      * @dev Get all the infos abount a bounty
      * @param bountyId uint256 id of the bounty 
+     * @return title string Title of the bounty
+     * @return description string Description of the bounty
+     * @return amount uint256 The amount that will be paid for this bounty
+     * @return id uint256 Bounty id
+     * @return creator Address of the bounty creator
+     * @return isOpened bool If the bounty is still opened for work submission
      */
     function getBountyInfos(uint256 bountyId) public view bountyExist(bountyId) returns (
         string memory title,
@@ -192,6 +234,7 @@ contract BountyApp {
 
     /**
      * @dev Returns the last bounty id that was created
+     * @return bountyId uint256 The last bounty id 
      */
     function getLastBountyId() public view returns (uint256) {
         return bountyId.current;
@@ -203,10 +246,11 @@ contract BountyApp {
      * @param description string Description of the work
      * @param id uint256 Id of the bounty the work has been done for
      * @notice Use IFPS to submit the work
+     * @return newWorkId uint256 The id of the new work
      */
-    function submitWork(string memory description, uint256 id) public bountyExist(id) bountyOpen(id) returns (uint256 newWorkId){
+    function submitWork(string memory description, uint256 id, string memory workFileHash) public stopInEmergency bountyExist(id) bountyOpen(id) returns (uint256 newWorkId){
         // Create the new work
-        Work memory work = Work(description, false, true, false, msg.sender);
+        Work memory work = Work(workFileHash, description, false, true, false, msg.sender);
         // Increment the workId
         newWorkId = workId.next();
         // Add the work to the list of work that has been submitted for this bounty
@@ -230,7 +274,7 @@ contract BountyApp {
      * @param _bountyId uint256 Id of the bounty the work is linked to
      * @param _workId uint256 Id of the work that will be approved
      */
-    function approveWork(uint256 _bountyId, uint256 _workId) public bountyExist(_bountyId) workExist(_workId) bountyOpen(_bountyId){
+    function approveWork(uint256 _bountyId, uint256 _workId) public stopInEmergency bountyExist(_bountyId) workExist(_workId) bountyOpen(_bountyId){
         // Check the message sender is also the creator of the bounty
         require(bountyIdToCreator[_bountyId] == msg.sender, "Must be the bounty creator");
         // Check this work was for this bounty
@@ -255,7 +299,7 @@ contract BountyApp {
      * @param _bountyId uint256 Id of the bounty the work is linked to
      * @param _workId uint256 Id of the work that will be rejected
      */
-    function rejectWork(uint256 _bountyId, uint256 _workId) public bountyExist(_bountyId) workExist(_workId) bountyOpen(_bountyId){
+    function rejectWork(uint256 _bountyId, uint256 _workId) public stopInEmergency bountyExist(_bountyId) workExist(_workId) bountyOpen(_bountyId){
         // Check the message sender is also the creator of the work
         require(bountyIdToCreator[_bountyId] == msg.sender, "Must be the bounty creator");
         // Check this work was for this bounty
@@ -271,29 +315,41 @@ contract BountyApp {
 
     /**
      * @dev Returns an array of uint256 that the ids of the work that have been submitted for this bounty
+     * @param _bountyId uint256
      */
     function getWorkProposedIds(uint256 _bountyId) public view returns (uint256[] memory) {
         return bountyIdToWorkIds[_bountyId];
     }
 
 
+    /**
+     * @dev Return the infos of a work
+     * @param _workId uint256 Id of the work
+     * @return id uint256 Id of the work
+     * @return description string Description of the work
+     * @return isDenied bool If the work has been rejected or not
+     * @return doer address od the work doer
+     * @return approved book If the work has been approved
+     */
     function getWorkInfos(uint256 _workId) public view returns (
         uint256 id,
         string memory description,
+        string memory workFileHash,
         bool isDenied,
         address doer,
         bool approved
     )
     {
         Work memory work = idToWork[_workId];
-        return (_workId, work.description, work.denied, work.doer, work.approved);
+        return (_workId, work.description, work.workFileHash, work.denied, work.doer, work.approved);
     }
     
     
     /**
      * @dev Allow to withdraw a pending balance of a user
      */
-    function withdrawPending() public {
+    function withdrawPending()  stopInEmergency public {
+        require(pendingWithdrawals[msg.sender] > 0, "You balance is nul, you can't withdraw anything");
         uint256 amount = pendingWithdrawals[msg.sender];
         pendingWithdrawals[msg.sender] = 0;
         msg.sender.transfer(amount);

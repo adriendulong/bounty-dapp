@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import '../App.css';
 import { withTheme } from '@material-ui/core/styles';
-import { Grid, Typography, Dialog, DialogTitle, Chip, Button, DialogActions} from "@material-ui/core";
+import { Grid, Typography, Dialog, DialogTitle, Chip, Button, DialogActions, Link} from "@material-ui/core";
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import 'typeface-roboto';
@@ -16,6 +16,10 @@ class WorkDetailDialog extends Component {
 
         if (accounts[0] == bounty.creator) return true;
         else return false;
+    }
+
+    ipfsLink = () => {
+        return `https://ipfs.io/ipfs/${this.props.work.workFileHash}`
     }
 
     render() {
@@ -38,6 +42,16 @@ class WorkDetailDialog extends Component {
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="body1">{this.props.work.description}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                            <div style={{marginBottom: 20}}>
+                                <Grid container alignItems="flex-start" direction="column">
+                                    <Grid item>
+                                        <Typography variant="overline"><b>File</b></Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Link href={this.ipfsLink()} variant="body1" target="_blank" rel="noopener noreferrer">{this.props.work.workFileHash}</Link>
                                     </Grid>
                                 </Grid>
                             </div>

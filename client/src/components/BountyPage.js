@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import '../App.css';
 import WorkProposedList from './WorkProposedList'
 import WorkDetailDialog from './WorkDetailDialog';
-import { Typography, Grid, Divider, Button, Dialog, AppBar, Toolbar, IconButton, Slide, TextField, Chip } from "@material-ui/core";
+import { Typography, Grid, Divider, Button, Dialog, AppBar, Toolbar, IconButton, Slide, TextField, Chip, Link } from "@material-ui/core";
 import CloseIcon from '@material-ui/icons/Close';
 import { withTheme } from '@material-ui/core/styles';
 import 'typeface-roboto';
@@ -22,8 +22,14 @@ class BountyPage extends Component {
             works: null,
             openDetailWork: false,
             workOpened: null,
-            isOpened: this.props.bounty.isOpened
+            isOpened: this.props.bounty.isOpened,
+            isWorkFileUploading: false,
+            workFile: '',
+            workFileHash: null,
+            workFileLink: null
+
         }
+        this.workFileInput = React.createRef();
         this.retrieveWorks();
     }
 
@@ -44,24 +50,39 @@ class BountyPage extends Component {
     }
 
     handlePropose = () => {
-        console.log(this.state.workDescription);
-        this.setState({
-            open: false
-        });
-        this.createWork(this.state.workDescription, this.props.bounty.id);
+        if(!this.state.workFileHash) {
+            alert("Can't process the new work, you must provide a file")
+        }
+        else{
+            console.log(this.state.workDescription);
+            this.setState({
+                open: false
+            });
+            this.createWork(this.state.workDescription, this.props.bounty.id, this.state.workFileHash);
+        }
+        
     }
 
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
     };
 
+    resetNewWorkInfos = () => {
+        this.setState({
+            isWorkFileUploading: false,
+            workFile: '',
+            workFileHash: null,
+            workFileLink: null
+        });
+    }
+
     /**
      * Create a new work for this bounty
      */
-    createWork = async (description, id) => {
+    createWork = async (description, id, workHashFile) => {
         const { accounts, contract } = this.props;
 
-        await contract.methods.submitWork(description, id).send({ from: accounts[0]});
+        await contract.methods.submitWork(description, id, workHashFile).send({ from: accounts[0]});
         await this.retrieveWorks();
     }
 
@@ -103,13 +124,43 @@ class BountyPage extends Component {
         });
     }
 
+    captureFile = (e) => {
+        console.log(e.target.files[0]);
+        let file = e.target.files[0];
+        let reader = new window.FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onloadend = async () => {
+            // File is converted to a buffer to prepare for uploading to IPFS
+            let buffer = await Buffer.from(reader.result);
+            console.log(buffer);
+            // Upload the file to IPFS and save the hash
+            this.props.ipfs.add({
+                path: file.name,
+                content: buffer
+            }).then(result => {
+              let fileHash = result[0].hash;
+              console.log('Logo uploaded: ', fileHash);
+              this.setState({
+                workFileHash: fileHash,
+                isWorkFileUploading: false,
+                workFileLink: `https://ipfs.io/ipfs/${fileHash}`
+              });
+            }).catch(err => {
+              console.log('Failed to upload the logo to IPFS: ', err);
+            })
+        };
+      
+    }
+
     approveWork = async (work) => {
         this.handleCloseWork();
         
         const { accounts, contract } = this.props;
         try {
             await contract.methods.approveWork(this.props.bounty.id, work.id).send({from: accounts[0]});
-            this.setState({isOpened: false});
+            this.setState({
+                isOpened: false
+            });
             await this.retrieveWorks();
         }
         catch (e) {
@@ -250,7 +301,32 @@ class BountyPage extends Component {
                                 onChange={this.handleChange('workDescription')}
                                 variant="outlined"
                                 fullWidth
+                                style={{marginBottom: 20}}
                             />
+                            <div style={{marginBottom: 10}}>
+                                <input
+                                className="work-file-input"
+                                ref={this.workFileInput}
+                                type="file"
+                                value={this.state.workFile}
+                                onChange={this.captureFile}
+                                />
+                                <Button 
+                                    size="small"
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={() => this.workFileInput.current.click()}
+                                >
+                                    Add a file
+                                </Button>
+                            </div>
+                            {this.state.workFileHash && (
+                                <div>
+                                    <Typography variant="body1">
+                                        New file added to the work. IPFS hash: <Link href={this.state.workFileLink} variant="body1" target="_blank" rel="noopener noreferrer">{this.state.workFileHash}</Link>
+                                    </Typography>
+                                </div>
+                            )}
                         </div>
                     </Dialog>
                     <WorkDetailDialog 

@@ -39,7 +39,7 @@ contract("BountyApp", accounts => {
     const nbWorkBefore = await instance.bountyCountWorks(newBountyId);
 
     // Submit a work for the job offer with id 1
-    await instance.submitWork("A beautiful map", newBountyId, {from: accounts[1]});
+    await instance.submitWork("A beautiful map", newBountyId, "hahah", {from: accounts[1]});
 
     // Get the number of work submitted for this offer
     const nbWork = await instance.bountyCountWorks(newBountyId);
@@ -63,7 +63,7 @@ contract("BountyApp", accounts => {
     let newBountyId = result.logs[0].args.bountyId.toNumber();
 
     // Submit a work for the job offer with id 1
-    result = await instance.submitWork("A beautiful map", newBountyId, {from: accounts[1]});
+    result = await instance.submitWork("A beautiful map", newBountyId, "hashipfs", {from: accounts[1]});
 
     // Get the id of the newly created offer
     let newWorkId = result.logs[0].args.workId.toNumber();
@@ -115,7 +115,7 @@ contract("BountyApp", accounts => {
     let newBountyId = result.logs[0].args.bountyId.toNumber();
 
     // Submit a work for the job offer with id 1
-    result = await instance.submitWork("I did it", newBountyId);
+    result = await instance.submitWork("I did it", newBountyId, "ipfshash");
 
     // Get the id of the newly created work
     let newWorkId = result.logs[0].args.workId.toNumber();
@@ -141,9 +141,10 @@ contract("BountyApp", accounts => {
     // Get the id of the newly created offer
     let newBountyId = result.logs[0].args.bountyId.toNumber();
 
-    let description = "I did this job"
+    let description = "I did this job";
+    let ipfsHash = "ipfshash";
     // Submit a work for the job offer with id 1
-    result = await instance.submitWork(description, newBountyId, {from: accounts[2]});
+    result = await instance.submitWork(description, newBountyId, ipfsHash, {from: accounts[2]});
 
     // Get the id of the newly created work
     let newWorkId = result.logs[0].args.workId.toNumber();
@@ -160,6 +161,7 @@ contract("BountyApp", accounts => {
     assert.equal(workInfos.isDenied, false, "Don't get the right isDenied from infos");
     assert.equal(workInfos.doer, accounts[2], "Don't get the right creator from infos");
     assert.equal(workInfos.approved, false, "Don't get the right approved from infos");
+    assert.equal(workInfos.workFileHash, ipfsHash, "Don't get the right ipfs Hash from infos");
     
   });
 
@@ -180,7 +182,7 @@ contract("BountyApp", accounts => {
 
     let description = "I did this job"
     // Submit a work for the job offer with id 1
-    result = await instance.submitWork(description, newBountyId, {from: accounts[2]});
+    result = await instance.submitWork(description, newBountyId, "ipfshash", {from: accounts[2]});
 
     // Get the id of the newly created work
     let newWorkId = result.logs[0].args.workId.toNumber();
@@ -197,5 +199,18 @@ contract("BountyApp", accounts => {
 
   //TODO: test the the number of works is incremented when a work is submitted
   // TODO: Check that the work id is added to the list of work done by the guy
+
+  // Test to see if the owner of the contract is able to activate the circuit breaker that will avoid 
+  // anyone to create a new bounty, create a new work, etc...
+  it("Should be able to activate the circuit breaker", async () => {
+    const instance = await BountyApp.deployed();
+
+    await instance.activateCircuitBreaker({from: accounts[0]});
+
+    let stopped = await instance.stopped({from: accounts[0]});
+
+    assert.equal(stopped, true, "The circuit breaker has not been activated");
+    
+  });
 
 });

@@ -35,3 +35,7 @@
   display: 'flex';
   flex-wrap: 'wrap'
 }
+
+.work-file-input {
+  display: none;
+}

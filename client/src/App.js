@@ -10,6 +10,7 @@ import { Divider } from '@material-ui/core';
 import { createMuiTheme, withTheme,  MuiThemeProvider } from '@material-ui/core/styles';
 import indigo from '@material-ui/core/colors/indigo';
 import deepOrange from '@material-ui/core/colors/deepOrange';
+import IPFS from 'ipfs';
 
 import "./App.css";
 
@@ -21,10 +22,20 @@ const theme = createMuiTheme({
 });
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null, bounties: null, selectedBounty: null, navText: "Bounty App", profile: false };
+  state = { storageValue: 0, web3: null, accounts: null, contract: null, bounties: null, selectedBounty: null, navText: "Bounty App", profile: false, ipfsNode: null, nodeReady: false };
 
   componentDidMount = async () => {
     try {
+      const node = new IPFS();
+      node.on('ready', async () => {
+        const version = await node.version()
+      
+        console.log('Version:', version.version)
+        this.setState({
+          nodeReady: true
+        });
+      })
+
       // Get network provider and web3 instance.
       const web3 = await getWeb3(this.changedAccount);
 
@@ -43,7 +54,7 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.getLastBounties);
+      this.setState({ web3, accounts, contract: instance, ipfsNode: node }, this.getLastBounties);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -142,7 +153,7 @@ class App extends Component {
           <div className="App">
             <NavBar title={this.state.navText} goHome={this.handleGoHome} goProfile={this.handleGoProfile}/>
             {this.state.selectedBounty && (
-              <BountyPage bounty={this.state.selectedBounty} web3={this.state.web3} contract={this.state.contract} accounts={this.state.accounts} quitBounty={this.handleQuitBounty}/>
+              <BountyPage bounty={this.state.selectedBounty} web3={this.state.web3} contract={this.state.contract} accounts={this.state.accounts} quitBounty={this.handleQuitBounty} ipfs={this.state.ipfsNode}/>
             )}
             {!this.state.selectedBounty && !this.state.profile && (
               <div>
