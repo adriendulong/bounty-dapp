@@ -6,7 +6,7 @@ import BountyPage from './components/BountyPage'
 import ProfilePage from './components/ProfilePage'
 import BountyApp from "./contracts/BountyApp.json";
 import getWeb3 from "./utils/getWeb3";
-import { Divider } from '@material-ui/core';
+import { Divider, Snackbar } from '@material-ui/core';
 import { createMuiTheme, withTheme,  MuiThemeProvider } from '@material-ui/core/styles';
 import indigo from '@material-ui/core/colors/indigo';
 import deepOrange from '@material-ui/core/colors/deepOrange';
@@ -22,7 +22,7 @@ const theme = createMuiTheme({
 });
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null, bounties: null, selectedBounty: null, navText: "Bounty App", profile: false, ipfsNode: null, nodeReady: false };
+  state = { storageValue: 0, web3: null, accounts: null, contract: null, bounties: null, selectedBounty: null, navText: "Bounty App", profile: false, ipfsNode: null, nodeReady: false, snackOpen: false };
 
   componentDidMount = async () => {
     try {
@@ -52,6 +52,9 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
+      // Watch for new bounty
+      instance.events.NewBounty({}, this.newBountyCallback);
+
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
       this.setState({ web3, accounts, contract: instance, ipfsNode: node }, this.getLastBounties);
@@ -63,6 +66,15 @@ class App extends Component {
       console.error(error);
     }
   };
+
+  newBountyCallback = (error, result) => {
+    console.log("NEW BOUNTY");
+    console.log(result);
+    this.setState({
+      snackOpen: false
+    });
+    this.getLastBounties();
+  }
 
   changedAccount = (accounts) => {
     console.log("CHANGED")
@@ -79,8 +91,11 @@ class App extends Component {
     const { web3, accounts, contract } = this.state;
 
     const amountForBounty = web3.utils.toWei(amount);
-    await contract.methods.createBounty(amountForBounty, title, description).send({ from: accounts[0], value: amountForBounty });
-    await this.getLastBounties();
+    contract.methods.createBounty(amountForBounty, title, description).send({ from: accounts[0], value: amountForBounty });
+    this.setState({
+      snackOpen: true
+    });
+    //await this.getLastBounties();
   }
 
   /**
@@ -169,6 +184,14 @@ class App extends Component {
             {this.state.profile && (
               <ProfilePage accounts={this.state.accounts} contract={this.state.contract} web3={this.state.web3} selectBounty={this.handleSelectBounty}></ProfilePage>
             )}
+            <Snackbar
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              open={this.state.snackOpen}
+              message={<span id="message-id">Waiting to be confirmed on the Ethereum Blockchain...</span>}
+            />
           </div>
         </MuiThemeProvider>
         

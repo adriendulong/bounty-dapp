@@ -33,6 +33,10 @@ This is how to launch the local server:
 
 In order to work, you must have Metamask installed in your browser, and have it connected to your Ganache local Ethereum blockchain.
 
+## Testnet deployment infos
+
+## Remote server
+
 ## Libraries or EthPM packages used
 ### SafeMath (from OpenZeppeling)
 I used the SaeMath library from OpenZeppelin in order to avoid integers overflow or underflow.

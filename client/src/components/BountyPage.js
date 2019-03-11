@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import '../App.css';
 import WorkProposedList from './WorkProposedList'
 import WorkDetailDialog from './WorkDetailDialog';
-import { Typography, Grid, Divider, Button, Dialog, AppBar, Toolbar, IconButton, Slide, TextField, Chip, Link } from "@material-ui/core";
+import { Typography, Grid, Divider, Button, Dialog, AppBar, Toolbar, IconButton, Slide, TextField, Chip, Link, Snackbar } from "@material-ui/core";
 import CloseIcon from '@material-ui/icons/Close';
 import { withTheme } from '@material-ui/core/styles';
 import 'typeface-roboto';
@@ -26,7 +26,8 @@ class BountyPage extends Component {
             isWorkFileUploading: false,
             workFile: '',
             workFileHash: null,
-            workFileLink: null
+            workFileLink: null,
+            snackOpen: false
 
         }
         this.workFileInput = React.createRef();
@@ -34,7 +35,15 @@ class BountyPage extends Component {
     }
 
     componentDidMount = async () => {
-        
+            // Watch for new bounty
+        this.props.contract.events.NewWork({}, this.newWorkCallback);
+    }
+
+    newWorkCallback = (error, result) => {
+        console.log("New Work");
+        this.setState({
+            snackOpen: false
+        }, this.retrieveWorks)
     }
 
     proposeWork = () => {
@@ -82,8 +91,11 @@ class BountyPage extends Component {
     createWork = async (description, id, workHashFile) => {
         const { accounts, contract } = this.props;
 
-        await contract.methods.submitWork(description, id, workHashFile).send({ from: accounts[0]});
-        await this.retrieveWorks();
+        contract.methods.submitWork(description, id, workHashFile).send({ from: accounts[0]});
+        this.setState({
+            snackOpen: true
+        });
+        //await this.retrieveWorks();
     }
 
     /**
@@ -338,6 +350,14 @@ class BountyPage extends Component {
                         handleReject={this.rejectWork}
                         handleApprove={this.approveWork}/>
                 </div>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                    open={this.state.snackOpen}
+                    message={<span id="message-id">Waiting to be confirmed on the Ethereum Blockchain...</span>}
+                />
             </div>
         );
     }

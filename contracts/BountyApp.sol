@@ -3,8 +3,6 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/drafts/Counter.sol";
 
-pragma solidity ^0.5.0;
-
 contract BountyApp {
     using SafeMath for uint256;
     using Counter for Counter.Counter;

@@ -26,4 +26,6 @@ Modifiers created: `bountyExist(uint256 id)`, `workExist(uint256 id)`, `bountyOp
 
 The idea with the pull over design pattern also called the _withdrawal pattern_, is to protect the Smart Contract from re-entrancy and denial of service attacks. 
 In place of sending directly funds to an address, we let the address withdraws the funds itself calling a function when he wants to withdraw them.
-This pattern is well explained on the [Solodity docs](https://solidity.readthedocs.io/en/v0.5.1/common-patterns.html#withdrawal-from-contracts) 
+This pattern is well explained on the [Solidity docs](https://solidity.readthedocs.io/en/v0.5.1/common-patterns.html#withdrawal-from-contracts).
+
+In this smart contract, when someone has his work approved for a bounty, the amount of this bounty is transfered to the balance of the user who submitted the work. Then from his profile, he/she can withdraw it whenever he wants. The wrong solution would have been to transfer directly the funds to the address when the work is approved.
