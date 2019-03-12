@@ -7,7 +7,7 @@ In this app the user is able to:
 * Create a bounty
 * See the last bounties posted
 * See the detail of a bounty, and know its status
-* Propose a work for an existing bounty
+* Propose a work for an existing bounty giving a description and uploading a file to IPFS network
 * If the user is the creator of a bounty he can review the works and accept or reject a work
 * Once a work has been accepted the bounty is set as closed and no work can be submitted anymore
 * Access to his profile to see its balance and withdraw it
@@ -36,20 +36,20 @@ In order to work, you must have Metamask installed in your browser, and have it 
 ## Testnet deployment infos
 The smart contract has been deployed on the Rinkeby test network.
 All the infos about the contract address and the transaction hash of the deployment can be found in the file `deployed_addresses.txt`.
-I had some issue verifying the code on Ethers
-x
+I had some issue verifying the code on Etherscan.
+
 ## Remote server
 The dapp is available at this url: https://bounty-dapp.now.sh
 Please use Metamask and the Rinkeby test network in order to access the app.
 
 ## Libraries or EthPM packages used
 ### SafeMath (from OpenZeppeling)
-I used the SaeMath library from OpenZeppelin in order to avoid integers overflow or underflow.
-This can happen when an integer overflows the limit that is set for this number. For example for an unsigned integer which limit is 2 ^ 256 - 1, if an integer overflow, the value will go back to 0.
+I used the _SafeMath_ library from OpenZeppelin in order to avoid integers overflow or underflow.
+This can happen when an integer overflows the limit that is set for this number. For example for an unsigned integer which limit is 2 ^ 256 - 1, if an integer overflows the value will go back to 0.
 
 
 ### Counter (from OpenZeppelin)
-The Counter library from OpenZeppelin provides an incrementing uint256 id that is useful 
+The _Counter_ library from OpenZeppelin provides an incrementing uint256 id that is useful 
 for issuing ids for ERC-721 tokens.
 In this project, it is used to issue a new id for each new bounty or work.
 
@@ -58,7 +58,8 @@ In this project, it is used to issue a new id for each new bounty or work.
 
 I used the IPFS in order to allow users to associate a file to a work that they submit.
 The file is uploaded to IPFS, the hash is saved. Later anyone can access the file through the IPFS gateway (a direct link is provided on each work).
-*WARNING*: In order for the IPFS file to be available through the gateway you may have to keep the dapp a bit open in order for the local daemon to transfer the file to other nodes.
+
+**WARNING**: In order for the IPFS file to be available through the gateway you may have to keep the dapp a bit open in order for the local daemon to transfer the file to other nodes.
 
 
 
