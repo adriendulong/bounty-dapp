@@ -18077,18 +18077,18 @@
     "4": {
       "events": {},
       "links": {},
-      "address": "0x1f3e841F8CC87B148509e51006eF84ef468E3c64",
-      "transactionHash": "0xb0af336330a3119df43b6c1c5dfa8273b2b3f4e6530fe14bd1b52884d2ab9b15"
+      "address": "0xe726cC2AF9B48d1312F4120473381F71CE06aE34",
+      "transactionHash": "0x37d9d84e6d2dec92ccb8f3f7facb2b44175f258b912ab99264bf949375353786"
     },
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xfa07B12621843CD9CE49580A37d33C00433609D9",
-      "transactionHash": "0xe6c78fe69aaead96c52c84944f5051020be34d440d689ac43566863b01f1a926"
+      "address": "0x311dc632a2834132113086fD8f88969B3fFEB6be",
+      "transactionHash": "0x9e6342e7625fa76ffb6ae8363559b2a138ff6856969dfbb2113092c58f845ee0"
     }
   },
   "schemaVersion": "3.0.1",
-  "updatedAt": "2019-03-11T15:49:38.687Z",
+  "updatedAt": "2019-03-12T13:29:38.573Z",
   "devdoc": {
     "methods": {
       "activateCircuitBreaker()": {

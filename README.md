@@ -34,8 +34,13 @@ This is how to launch the local server:
 In order to work, you must have Metamask installed in your browser, and have it connected to your Ganache local Ethereum blockchain.
 
 ## Testnet deployment infos
+The smart contract has been deployed on the Rinkeby test network.
+All the infos about the contract address and the transaction hash of the deployment can be found in the file `deployed_addresses.txt`.
+I had some issue verifying the code on Ethers
 
 ## Remote server
+The dapp is available at this url: https://bounty-dapp-5ieh8wdy2.now.sh/
+Please use Metamask and the Rinkeby test network in order to access the app.
 
 ## Libraries or EthPM packages used
 ### SafeMath (from OpenZeppeling)
@@ -53,6 +58,7 @@ In this project, it is used to issue a new id for each new bounty or work.
 
 I used the IPFS in order to allow users to associate a file to a work that they submit.
 The file is uploaded to IPFS, the hash is saved. Later anyone can access the file through the IPFS gateway (a direct link is provided on each work).
+*WARNING*: In order for the IPFS file to be available through the gateway you may have to keep the dapp a bit open in order for the local daemon to transfer the file to other nodes.
 
 
 

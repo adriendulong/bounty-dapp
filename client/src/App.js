@@ -14,6 +14,7 @@ import IPFS from 'ipfs';
 
 import "./App.css";
 
+// Create a Material Design UI Theme
 const theme = createMuiTheme({
   palette: {
     primary: indigo,
@@ -22,10 +23,25 @@ const theme = createMuiTheme({
 });
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null, bounties: null, selectedBounty: null, navText: "Bounty App", profile: false, ipfsNode: null, nodeReady: false, snackOpen: false };
+  // Init the state of the app
+  state = { 
+    storageValue: 0, 
+    web3: null, 
+    accounts: null, 
+    contract: null, 
+    bounties: null, 
+    selectedBounty: null, 
+    navText: "Bounty App", 
+    profile: false, 
+    ipfsNode: null, 
+    nodeReady: false, 
+    snackOpen: false 
+  };
 
+  // When the compnent mount we init all the web3 variables
   componentDidMount = async () => {
     try {
+      // Init the IPFS node
       const node = new IPFS();
       node.on('ready', async () => {
         const version = await node.version()
@@ -38,8 +54,6 @@ class App extends Component {
 
       // Get network provider and web3 instance.
       const web3 = await getWeb3(this.changedAccount);
-
-      //web3.currentProvider.publicConfigStore.on('update', this.changedAccount);
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
@@ -57,7 +71,13 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance, ipfsNode: node }, this.getLastBounties);
+      this.setState({ 
+        web3, 
+        accounts, 
+        contract: instance, 
+        ipfsNode: node 
+      }, this.getLastBounties);
+
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -67,15 +87,15 @@ class App extends Component {
     }
   };
 
+  // Function called when a new bounty is created and an event is received
   newBountyCallback = (error, result) => {
-    console.log("NEW BOUNTY");
-    console.log(result);
     this.setState({
       snackOpen: false
     });
     this.getLastBounties();
   }
 
+  // Callback function called when the account on Metamask is changed
   changedAccount = (accounts) => {
     console.log("CHANGED")
     this.setState({
@@ -95,7 +115,6 @@ class App extends Component {
     this.setState({
       snackOpen: true
     });
-    //await this.getLastBounties();
   }
 
   /**
@@ -125,6 +144,7 @@ class App extends Component {
     this.setState({bounties: results});
   }
 
+  // Get back to the home page of the app
   handleGoHome = () => {
     this.setState({
       profile: false,
@@ -133,6 +153,7 @@ class App extends Component {
     });
   }
 
+  // Drive the user to the profile page
   handleGoProfile = () => {
     this.setState({
       profile: true,
@@ -141,6 +162,7 @@ class App extends Component {
     })
   }
 
+  // Handle when the user select a bounty
   handleSelectBounty = (bounty) => {
     console.log(bounty);
     this.setState({

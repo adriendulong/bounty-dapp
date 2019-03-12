@@ -1,4 +1,4 @@
 The contract has been deployed on the Rinkeby testnet.
 
-Transaction hash: 0xb0af336330a3119df43b6c1c5dfa8273b2b3f4e6530fe14bd1b52884d2ab9b15 (https://rinkeby.etherscan.io/tx/0xb0af336330a3119df43b6c1c5dfa8273b2b3f4e6530fe14bd1b52884d2ab9b15)
-Contract address: 0x1f3e841F8CC87B148509e51006eF84ef468E3c64 (https://rinkeby.etherscan.io/address/0x1f3e841F8CC87B148509e51006eF84ef468E3c64)
+Transaction hash: 0x37d9d84e6d2dec92ccb8f3f7facb2b44175f258b912ab99264bf949375353786 (https://rinkeby.etherscan.io/tx/0x37d9d84e6d2dec92ccb8f3f7facb2b44175f258b912ab99264bf949375353786)
+Contract address: 0xe726cC2AF9B48d1312F4120473381F71CE06aE34 (https://rinkeby.etherscan.io/address/0xe726cC2AF9B48d1312F4120473381F71CE06aE34)

@@ -14,7 +14,6 @@ function Transition(props) {
 class BountyPage extends Component {
     constructor(props) {
         super(props);
-        console.log(props);
         this.state = {
             open: false,
             workDescription: "",
@@ -35,29 +34,55 @@ class BountyPage extends Component {
     }
 
     componentDidMount = async () => {
-            // Watch for new bounty
+        // Watch for new events on the blockchain
         this.props.contract.events.NewWork({}, this.newWorkCallback);
+        this.props.contract.events.WorkApproved({}, this.workApprovedCallback);
+        this.props.contract.events.WorkRejected({}, this.workRejectedCallback);
     }
 
-    newWorkCallback = (error, result) => {
-        console.log("New Work");
+    // Callback called when a work has been approved
+    workApprovedCallback = (error, result) => {
+        console.log("Work approved");
+        // Close the snackboar and update the works list
+        this.setState({
+            isOpened: false,
+            snackOpen: false
+        }, this.retrieveWorks)
+    }
+
+    // Callback called when a work has been rejected
+    workRejectedCallback = (error, result) => {
+        console.log("Work Rejected");
+        // Close the snackboar and update the works list
         this.setState({
             snackOpen: false
         }, this.retrieveWorks)
     }
 
+    // Callback called when a new work has been submitted
+    newWorkCallback = (error, result) => {
+        console.log("New Work");
+        // Close the snackboar and update the works list
+        this.setState({
+            snackOpen: false
+        }, this.retrieveWorks)
+    }
+
+    // Open the dialog screen that will handle the input of the user
     proposeWork = () => {
         this.setState({
             open: true
         });
     }
 
+    // Hendle the close of the dialog window
     handleClose = () => {
         this.setState({
             open: false
         });
     }
 
+    // Handle when a user proposes a new work
     handlePropose = () => {
         if(!this.state.workFileHash) {
             alert("Can't process the new work, you must provide a file")
@@ -76,6 +101,8 @@ class BountyPage extends Component {
         this.setState({ [name]: event.target.value });
     };
 
+    // Reset the infos of the work in order to have an empty screen
+    // next time someone enter a new work
     resetNewWorkInfos = () => {
         this.setState({
             isWorkFileUploading: false,
@@ -91,11 +118,14 @@ class BountyPage extends Component {
     createWork = async (description, id, workHashFile) => {
         const { accounts, contract } = this.props;
 
+        // Submit the work to the contract
         contract.methods.submitWork(description, id, workHashFile).send({ from: accounts[0]});
+
+        // Open the snackbar waiting for the blockchain mining confirmation
         this.setState({
             snackOpen: true
         });
-        //await this.retrieveWorks();
+        this.resetNewWorkInfos();
     }
 
     /**
@@ -121,13 +151,14 @@ class BountyPage extends Component {
         })
     }
 
+    // Handle when we close the dialog box of a work details
     handleCloseWork = () => {
-        console.log("Close detail work");
         this.setState({
             openDetailWork: false,
             workOpened: null
         });
     }
+
 
     openWork = (work) => {
         this.setState({
@@ -136,6 +167,7 @@ class BountyPage extends Component {
         });
     }
 
+    // Manage to upload a file to the IPFS network
     captureFile = (e) => {
         console.log(e.target.files[0]);
         let file = e.target.files[0];
@@ -151,7 +183,6 @@ class BountyPage extends Component {
                 content: buffer
             }).then(result => {
               let fileHash = result[0].hash;
-              console.log('Logo uploaded: ', fileHash);
               this.setState({
                 workFileHash: fileHash,
                 isWorkFileUploading: false,
@@ -164,16 +195,20 @@ class BountyPage extends Component {
       
     }
 
+    // Handle a work approval
     approveWork = async (work) => {
+        // Close the dialog box
         this.handleCloseWork();
         
         const { accounts, contract } = this.props;
         try {
-            await contract.methods.approveWork(this.props.bounty.id, work.id).send({from: accounts[0]});
+            // Ask the contract to approve the work
+            contract.methods.approveWork(this.props.bounty.id, work.id).send({from: accounts[0]});
+
+            // Open the snackbar while waitring for the blockchain confirmation
             this.setState({
-                isOpened: false
+                snackOpen: true
             });
-            await this.retrieveWorks();
         }
         catch (e) {
             console.error(e);
@@ -181,12 +216,24 @@ class BountyPage extends Component {
         
     }
 
+    // Handle when a work is rejected
     rejectWork = async (work) => {
+        // Close the work details dialog box
         this.handleCloseWork();
         
         const { accounts, contract } = this.props;
-        await contract.methods.rejectWork(this.props.bounty.id, work.id).send({from: accounts[0]});
-        await this.retrieveWorks();
+        try {
+            // Ask the contract to reject the work
+            contract.methods.rejectWork(this.props.bounty.id, work.id).send({from: accounts[0]});
+
+            // Open the snackbar while waiting for the blockchain approval
+            this.setState({
+                snackOpen: true
+            });
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
 
     render() {
