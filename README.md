@@ -15,7 +15,7 @@ In this app the user is able to:
 
 ## Local project set up
 ### Smart Contract
-In order to test the project on your local machine, you'll have to have [Ganache](https://truffleframework.com/ganache) installed and running on `https://127.0.0.1:7545` and [Truffle](https://truffleframework.com/truffle) too to deploy the smart contracts.
+In order to test the project on your local machine, you'll have to have [Ganache](https://truffleframework.com/ganache) installed and running on `https://127.0.0.1:8545` and [Truffle](https://truffleframework.com/truffle) too to deploy the smart contracts.
 
 Then to deploy the smart contracts:
 1. Go in the project folder
@@ -39,7 +39,7 @@ All the infos about the contract address and the transaction hash of the deploym
 I had some issue verifying the code on Ethers
 x
 ## Remote server
-The dapp is available at this url: https://bounty-dapp-dylkx1cy2.now.sh
+The dapp is available at this url: https://bounty-dapp.now.sh
 Please use Metamask and the Rinkeby test network in order to access the app.
 
 ## Libraries or EthPM packages used

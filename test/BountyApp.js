@@ -140,8 +140,6 @@ contract("BountyApp", accounts => {
     // Get the array of work ids that was submitted for the bounty we just created
     let workIds = await instance.getWorkProposedIds(newBountyId);
 
-    console.log(workIds)
-
     // Check that the first work id is equal to the one we just proposed
     assert.equal(workIds[0].toNumber(), newWorkId, "Don't get the work ids");
     // Check that the lenght of the array is only 1
