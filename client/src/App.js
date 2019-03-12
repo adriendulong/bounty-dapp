@@ -67,7 +67,7 @@ class App extends Component {
       );
 
       // Watch for new bounty
-      instance.events.NewBounty({}, this.newBountyCallback);
+      instance.events.NewBounty({creator: accounts[0]}, this.newBountyCallback);
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.

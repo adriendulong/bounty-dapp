@@ -37,9 +37,9 @@ In order to work, you must have Metamask installed in your browser, and have it 
 The smart contract has been deployed on the Rinkeby test network.
 All the infos about the contract address and the transaction hash of the deployment can be found in the file `deployed_addresses.txt`.
 I had some issue verifying the code on Ethers
-
+x
 ## Remote server
-The dapp is available at this url: https://bounty-dapp-5ieh8wdy2.now.sh/
+The dapp is available at this url: https://bounty-dapp-dylkx1cy2.now.sh
 Please use Metamask and the Rinkeby test network in order to access the app.
 
 ## Libraries or EthPM packages used

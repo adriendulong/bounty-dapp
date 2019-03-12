@@ -78,10 +78,11 @@ contract BountyApp {
 
 
     /// EVENTS
-    event NewBounty(uint256 bountyId, address creator);
-    event NewWork(uint256 workId, uint256 bountyId, address hunter);
-    event WorkApproved(uint256 workId, uint256 bountyId);
-    event WorkRejected(uint256 workId, uint256 bountyId);
+    event NewBounty(uint256 bountyId, address indexed creator);
+    event NewWork(uint256 workId, uint256 indexed bountyId, address indexed hunter);
+    event WorkApproved(uint256 workId, uint256 indexed bountyId);
+    event WorkRejected(uint256 workId, uint256 indexed bountyId);
+    event BalanceWithdrawed(address indexed withdrawer);
     
     /**
      * @dev Constructor that set the owner of the contract
@@ -351,5 +352,6 @@ contract BountyApp {
         uint256 amount = pendingWithdrawals[msg.sender];
         pendingWithdrawals[msg.sender] = 0;
         msg.sender.transfer(amount);
+        emit BalanceWithdrawed(msg.sender);
     }
 }

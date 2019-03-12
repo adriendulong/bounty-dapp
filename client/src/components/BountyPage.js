@@ -35,9 +35,9 @@ class BountyPage extends Component {
 
     componentDidMount = async () => {
         // Watch for new events on the blockchain
-        this.props.contract.events.NewWork({}, this.newWorkCallback);
-        this.props.contract.events.WorkApproved({}, this.workApprovedCallback);
-        this.props.contract.events.WorkRejected({}, this.workRejectedCallback);
+        this.props.contract.events.NewWork({bountyId: this.props.bounty.id}, this.newWorkCallback);
+        this.props.contract.events.WorkApproved({bountyId: this.props.bounty.id}, this.workApprovedCallback);
+        this.props.contract.events.WorkRejected({bountyId: this.props.bounty.id}, this.workRejectedCallback);
     }
 
     // Callback called when a work has been approved
@@ -395,7 +395,8 @@ class BountyPage extends Component {
                         work={this.state.workOpened} 
                         bounty={this.props.bounty} 
                         handleReject={this.rejectWork}
-                        handleApprove={this.approveWork}/>
+                        handleApprove={this.approveWork}
+                        isOpened={this.state.isOpened}/>
                 </div>
                 <Snackbar
                     anchorOrigin={{

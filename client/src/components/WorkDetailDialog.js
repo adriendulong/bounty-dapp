@@ -81,12 +81,12 @@ class WorkDetailDialog extends Component {
                             <Button onClick={this.props.handleClose} color="primary">
                                 Ok
                             </Button>
-                            {this.isBountyCreator() && this.props.bounty.isOpened && (
+                            {this.isBountyCreator() && this.props.isOpened && (
                                 <Button onClick={this.props.handleReject.bind(this, this.props.work)} color="secondary">
                                     Reject
                                 </Button>
                             )}
-                            {this.isBountyCreator() && this.props.bounty.isOpened && (
+                            {this.isBountyCreator() && this.props.isOpened && (
                                 <Button color="primary" onClick={this.props.handleApprove.bind(this, this.props.work)}>
                                     Approve
                                 </Button>
